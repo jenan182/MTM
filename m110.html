@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>تمّام - مساعد الحج والعمرة</title>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet"/>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #1a1a1a;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      font-family: 'Tajawal', sans-serif;
+    }
+    .watch-container {
+      position: relative;
+      width: 426px;
+      height: 585px;
+      margin: auto;
+    }
+    .watch-img {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 10;
+    }
+    .watch-frame {
+      position: absolute;
+      top: 155px;
+      left: 75px;
+      width: 225px;
+      height: 277px;
+      z-index: 5;
+      border-radius: 28px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      direction: rtl;
+      background: #f5f0eb;
+    }
+    .header {
+      background: #8B5E3C;
+      padding: 10px 12px 12px;
+      border-radius: 0 0 18px 18px;
+      flex-shrink: 0;
+      position: relative;
+    }
+    .header-title { color: #fff; font-size: 20px; font-weight: 700; text-align: center; }
+    .header-sub { color: rgba(255,255,255,0.75); font-size: 9px; text-align: center; margin-top: 1px; }
+    .header-arrow { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: #fff; font-size: 14px; }
+    .chat-area {
+      flex: 1; overflow-y: auto; padding: 8px 8px 4px;
+      display: flex; flex-direction: column; gap: 6px; scrollbar-width: none;
+    }
+    .chat-area::-webkit-scrollbar { display: none; }
+    .bot-msg {
+      background: #fff; border: 1px solid #c9b89a;
+      border-radius: 12px 12px 4px 24px; padding: 12px 8px 7px 12px;
+      font-size: 9px; color: #3a2a1a; line-height: 1.5;
+      max-width: 90%; align-self: flex-end; position: relative;
+    }
+    .bot-icon {
+      position: absolute; left: -8px; top: 0;
+      width: 16px; height: 16px; background: #8B5E3C;
+      border-radius: 50%; display: flex; align-items: center;
+      justify-content: center; font-size: 8px;
+    }
+    .user-msg {
+      background: #8B5E3C; border-radius: 12px 12px 12px 4px;
+      padding: 6px 8px; font-size: 9px; color: #fff;
+      max-width: 85%; align-self: flex-start; line-height: 1.5;
+    }
+    .typing-dots {
+      display: flex; gap: 3px; padding: 6px 8px;
+      background: #fff; border: 1px solid #c9b89a;
+      border-radius: 12px 12px 4px 12px;
+      max-width: 50px; align-self: flex-end;
+    }
+    .typing-dots span {
+      width: 4px; height: 4px; background: #8B5E3C;
+      border-radius: 50%; animation: bounce 1.2s infinite;
+    }
+    .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes bounce { 0%,60%,100%{transform:translateY(0);} 30%{transform:translateY(-4px);} }
+    .input-bar {
+      background: #ede6dc; padding: 6px 8px;
+      display: flex; align-items: center; gap: 5px; flex-shrink: 0;
+    }
+    .send-btn {
+      background: none; border: none; cursor: pointer;
+      padding: 2px; color: #8B5E3C; font-size: 13px; flex-shrink: 0;
+    }
+    .input-field {
+      flex: 1; background: #f5f0eb; border: 1px solid #c9b89a;
+      border-radius: 20px; padding: 5px 8px; font-size: 9px;
+      font-family: 'Tajawal', sans-serif; direction: rtl;
+      color: #3a2a1a; outline: none;
+    }
+    .input-field::placeholder { color: #b0a090; }
+    .mic-btn {
+      background: none; border: none; cursor: pointer;
+      font-size: 13px; flex-shrink: 0; transition: all 0.2s; padding: 2px;
+    }
+    .mic-btn.recording { animation: pulse 0.8s infinite alternate; }
+    @keyframes pulse { from{transform:scale(1);} to{transform:scale(1.3);} }
+    .status-bar {
+      font-size: 8px; text-align: center; padding: 2px 4px;
+      color: #8B5E3C; background: #f5f0eb; flex-shrink: 0; min-height: 14px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="watch-container">
+
+    <div class="watch-frame">
+      <div class="header">
+        <div class="header-title">تمّام</div>
+        <div class="header-sub">مساعدك الذكي</div>
+        <div class="header-arrow">→</div>
+      </div>
+      <div class="status-bar" id="statusBar"></div>
+      <div class="chat-area" id="chatArea">
+        <div class="bot-msg" style="position:relative;">
+          <div class="bot-icon">🤖</div>
+          السلام عليكم ورحمة الله وبركاته 🙏<br>
+          أنا تمّام، مساعدك الذكي لرحلة الحج والعمرة.. كيف أقدر أساعدك اليوم؟
+        </div>
+      </div>
+      <div class="input-bar">
+        <button class="send-btn" onclick="sendText()">➤</button>
+        <input class="input-field" id="userInput" placeholder="أكتب سؤالك هنا .." onkeydown="if(event.key==='Enter')sendText()"/>
+        <button class="mic-btn" id="micBtn" onclick="toggleRecording()">🎤</button>
+      </div>
+    </div>
+
+    <img class="watch-img" src="watch_frame_remove.png"/>
+
+  </div>
+
+  <script>
+    // ==============================
+    const API_KEY  = "sk-xySizJZ1r-dZViKCqGtKKQ";
+    const BASE_URL = "https://elmodels.ngrok.app/v1";
+    // ==============================
+
+    const ASR_URL  = BASE_URL + "/audio/transcriptions";
+    const CHAT_URL = BASE_URL + "/chat/completions";
+    const TTS_URL  = BASE_URL + "/audio/speech";
+
+    const SYSTEM_PROMPT = `أنت تمّام، مساعد ذكي متخصص في رحلات الحج والعمرة. تتحدث باللغة العربية فقط. ردودك قصيرة جداً ومناسبة لشاشة ساعة صغيرة (جملة أو جملتين كحد أقصى). أنت ودود ومحترم.`;
+
+    let mediaRecorder = null;
+    let audioChunks   = [];
+    let isRecording   = false;
+
+    function setStatus(msg) { document.getElementById('statusBar').textContent = msg; }
+
+    function addMsg(text, isUser) {
+      const chatArea = document.getElementById('chatArea');
+      const div = document.createElement('div');
+      if (isUser) {
+        div.className = 'user-msg';
+        div.textContent = text;
+      } else {
+        div.className = 'bot-msg';
+        div.style.position = 'relative';
+        div.innerHTML = `<div class="bot-icon">🤖</div>${text}`;
+      }
+      chatArea.appendChild(div);
+      chatArea.scrollTop = chatArea.scrollHeight;
+    }
+
+    function showTyping() {
+      const chatArea = document.getElementById('chatArea');
+      const div = document.createElement('div');
+      div.className = 'typing-dots'; div.id = 'typing';
+      div.innerHTML = '<span></span><span></span><span></span>';
+      chatArea.appendChild(div);
+      chatArea.scrollTop = chatArea.scrollHeight;
+    }
+
+    function removeTyping() { const t = document.getElementById('typing'); if(t) t.remove(); }
+
+    async function askNuha(text) {
+      showTyping(); setStatus('جاري الرد...');
+      try {
+        const res = await fetch(CHAT_URL, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${API_KEY}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            model: 'nuha-2.0',
+            messages: [
+              { role: 'system', content: SYSTEM_PROMPT },
+              { role: 'user',   content: text }
+            ]
+          })
+        });
+        const data  = await res.json();
+        removeTyping();
+        const reply = data.choices?.[0]?.message?.content || 'عذراً، حدث خطأ.';
+        addMsg(reply, false); setStatus('');
+        await speakText(reply);
+      } catch(e) {
+        removeTyping(); addMsg('تعذّر الاتصال بالخادم', false); setStatus('');
+      }
+    }
+
+    async function speakText(text) {
+      setStatus('🔊 جاري القراءة...');
+      try {
+        const res = await fetch(TTS_URL, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${API_KEY}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ model: 'elm-tts', voice: 'default', input: text })
+        });
+        const blob  = await res.blob();
+        const audio = new Audio(URL.createObjectURL(blob));
+        audio.onended = () => setStatus('');
+        audio.play();
+      } catch(e) { setStatus(''); }
+    }
+
+    function sendText() {
+      const input = document.getElementById('userInput');
+      const text  = input.value.trim();
+      if (!text) return;
+      input.value = '';
+      addMsg(text, true);
+      askNuha(text);
+    }
+
+    async function toggleRecording() {
+      const btn = document.getElementById('micBtn');
+      if (!isRecording) {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          mediaRecorder = new MediaRecorder(stream);
+          audioChunks   = [];
+          mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+          mediaRecorder.onstop = async () => {
+            setStatus('جاري تحويل الصوت...');
+            const blob = new Blob(audioChunks, { type: 'audio/wav' });
+            const form = new FormData();
+            form.append('file', blob, 'audio.wav');
+            form.append('model', 'elm-asr');
+            form.append('language', 'ar');
+            try {
+              const res  = await fetch(ASR_URL, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${API_KEY}` },
+                body: form
+              });
+              const data = await res.json();
+              const txt  = data.text || '';
+              if (txt) { addMsg(txt, true); askNuha(txt); }
+              else setStatus('ما فُهم الصوت، حاول مجدداً');
+            } catch(e) { setStatus('خطأ في تحويل الصوت'); }
+            stream.getTracks().forEach(t => t.stop());
+          };
+          mediaRecorder.start();
+          isRecording = true;
+          btn.textContent = '⏹️';
+          btn.classList.add('recording');
+          setStatus('🔴 جاري التسجيل...');
+        } catch(e) { setStatus('تعذّر الوصول للميكروفون'); }
+      } else {
+        mediaRecorder.stop();
+        isRecording = false;
+        btn.textContent = '🎤';
+        btn.classList.remove('recording');
+        setStatus('جاري المعالجة...');
+      }
+    }
+  </script>
+</body>
+</html>
